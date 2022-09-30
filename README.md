@@ -131,7 +131,7 @@ app.getQuery("车辆")
 ```javascript
 app.createMarker({
     name:'车辆',
-    url:'图片的CDN地址,推荐使用线上的资源"
+    url:"图片的CDN地址,推荐使用线上的资源",
     position:[0,2,5],
     scale:[1,1,1],
     userData:{

@@ -1,8 +1,8 @@
 {
   "name": "plain-three",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "龚箭",
-  "description": "threeJS工具库",
+  "description": "planThree简易化的threeJS工具库,通过API快速实现three场景",
   "keywords": [
     "three",
     "javaScript",
