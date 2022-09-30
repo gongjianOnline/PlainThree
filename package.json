@@ -1,0 +1,16 @@
+{
+  "name": "plain-three",
+  "version": "1.0.1",
+  "author": "龚箭",
+  "description": "threeJS工具库",
+  "keywords": [
+    "three",
+    "javaScript",
+    "webGL"
+  ],
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.145.0"
+  }
+}
