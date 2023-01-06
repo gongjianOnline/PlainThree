@@ -103,7 +103,6 @@ function PlainThree(options) {
       // 循环外部模型的关键帧动画
       if(userObj.moduleAnimations.length){
         userObj.moduleAnimations.forEach((item)=>{
-          console.log("循环",userObj.moduleAnimations)
           item.example.update(T)
         })
       }
@@ -184,7 +183,6 @@ function PlainThree(options) {
         // 帧动画功能模块
         let exampleItem = null;
         let ItemAnimations = null;
-        console.log("模型信息引入",gltf)
         if(gltf.animations.length){
           gltf.scene.animations = gltf.animations
           exampleItem = new AnimationMixer(gltf.scene)
