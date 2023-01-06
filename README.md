@@ -1,6 +1,6 @@
 # planThree 简易化的 ThreeJS
 
-版本号： V1.0.3
+版本号： V1.0.4
 
 本插件是基于 ThreeJs 的二次封装, 可以让使用者通过API调用方式快速创建自己的Three场景, 工具库中提供了基础交互功能,更多功能持续更新中
 
@@ -62,7 +62,7 @@ const app = PlainThree({
 })
 ```
 
-createSceneModule返回一个 promise 对象,成功返回 true ,失败返回报错信息
+createSceneModule返回一个 promise 对象, 成功返回模型的实例对象（可用于模型实例的二次开发），失败则返回错误信息
 
 配置项
 
@@ -84,6 +84,7 @@ await app.createParts({
     rootPath: "/car/",
     moduleFile: "acura-rlx-2021.quads.gltf",
     position: [0, 1, 0],
+    zoom:[0,0,0]
     userData: {
         name: "车辆",
         carCode: "京B2022",
@@ -92,7 +93,20 @@ await app.createParts({
 });
 ```
 
-createParts返回一个 promise 对象,成功返回 true ,失败返回报错信息, 
+**在V1.0.4版本中，支持对模型的帧动画操作**；createParts返回一个 promise 对象,成功返回对象实例和关键帧动画实例 ,失败返回报错信息。
+
+返回示例
+
+```javascript
+{
+    gltf:{}, // 模型对象
+	ItemAnimations:{ //动画属性
+        id:'' , //生成当前该模型动画的uuid，
+        example:"", // 当前的动画加载器实例
+        animationAction：exampleItem.clipAction(gltf.animations[2], // 当前的动画源
+    }
+}
+```
 
 配置项
 
@@ -103,6 +117,7 @@ createParts返回一个 promise 对象,成功返回 true ,失败返回报错信�
 | userData   | object | 是       | 自定义数据集合 |
 | moduleName | string | 是       | 模型名称       |
 | position   | array  | 是       | 模型位置       |
+| zoom       | arrat  | 是       | 模型缩放       |
 
 ---
 
@@ -222,3 +237,30 @@ window.addEventListener("dblclick", (event) => {
 | ------ | ------------- | ----------------------------- |
 | obj    | object        | 当前鼠标点击拾取物体          |
 | point  | array[number] | 当前鼠标点击的场景坐标[x,y,z] |
+
+---
+
+### 10.外部模型的关键帧动画使用
+
+参考第三节的创建物体后返回的实例对象
+
+代码示例
+
+```javascript
+ var botany = await this.app.createParts({
+     rootPath:"./threeModule/zhizhu/",
+     moduleFile: "zhizhu.glb",
+     position: [-15,5,20],
+     zoom:[2,2,2],
+     moduleName: "蜘蛛",
+})
+console.log("蜘蛛模型",botany) // 此时的变量已经返回了模型实例和动画实例
+//播放帧动画
+let {exampleItem,ItemAnimations} = botany.animation;
+ItemAnimations.animationAction = exampleItem.clipAction(this.insect.gltf.animations[index])
+ItemAnimations.animationAction.play()
+
+/*如果出去动画停止，或者切换动画时，需要调用stop()停止当前的动画*/
+ItemAnimations.animationAction.stop()
+```
+

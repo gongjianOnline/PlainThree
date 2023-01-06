@@ -3,6 +3,12 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { AnimationMixer } from "three/src/animation/AnimationMixer.js"
+
+import TWEEN from '@tweenjs/tween.js'
+
+import { v4 as uuidv4 } from "uuid"
+
 /**
  * options 参数为可配置项
  *  elementId string 挂载实例的HTML的id
@@ -27,6 +33,10 @@ function PlainThree(options) {
   var controls = undefined;
   var group = undefined;
   /***/
+  /**自定义全局变量对象 */
+  var userObj = {
+    moduleAnimations:[]
+  };
   /**
  * 初始化实例
  *  options
@@ -90,17 +100,18 @@ function PlainThree(options) {
     var T = clock.getDelta();
     timeS = timeS + T;
     if (timeS > renderT) {
+      // 循环外部模型的关键帧动画
+      if(userObj.moduleAnimations.length){
+        userObj.moduleAnimations.forEach((item)=>{
+          console.log("循环",userObj.moduleAnimations)
+          item.example.update(T)
+        })
+      }
+      TWEEN.update(); //tween更新
       renderer.render(scene, camera);
       controls.update();
       timeS = 0;
     }
-  };
-
-  /**实时更新*/
-  app.prototype.watchRender = function () {
-    return window.requestAnimationFrame(
-      app.prototype.updateRender.bind(app)
-    );
   };
 
   /**创建场景模型 */
@@ -112,7 +123,7 @@ function PlainThree(options) {
    *  - useData object 模型自定义数据 （必填）
    *  - moduleName string 模型名称 （必填）
    * 返回值
-   *  - promise 成功返回 true 失败返回false
+   *  - promise 成功返回模型的实例对象 失败返回false
    */
   app.prototype.createSceneModule = function (options) {
     return new Promise((resolve, reject) => {
@@ -125,7 +136,7 @@ function PlainThree(options) {
           scene.userData = options.useData;
           scene.add(group);
           app.prototype.updateRender();
-          resolve(true);
+          resolve(gltf);
         },
         () => {},
         (error) => {
@@ -143,24 +154,57 @@ function PlainThree(options) {
     *  - userData object 模型自定义数据 （必填）
     *  - moduleName string 模型名称 （必填）
     *  - position array 模型位置 (必填项)
+    *  - zoom array 缩放大小(选填)
+    * 
+    *返回promise对象，
+    *  - 成功返回模型的实例对象
+    *     - gltf 模型的实例动画
+    *     - ItemAnimations 模型的关键帧动画实例(可从外部通过JS切换动画内容)
+    *  - 失败则返回error错误信息
   */
   app.prototype.createParts = function(options){
     return new Promise((resolve,reject)=>{
       const loader = new GLTFLoader().setPath(options.rootPath);
       loader.load(options.moduleFile, (gltf) => {
-        gltf.scene.traverse((child) => {
-          child.name = options.moduleName;
-          child.userData = options.userData;
-        });
+        
+        // 自定义位置信息
         gltf.scene.position.x = options.position[0] || 0;
         gltf.scene.position.y = options.position[1] || 0;
         gltf.scene.position.z = options.position[2] || 0;
-        group.add(gltf.scene);
+        // 自定义属性
         gltf.scene.name = options.moduleName;
         gltf.scene.userData = options.userData;
-        scene.add(group);
+        // 缩放
+        if(options?.zoom){
+          gltf.scene.scale.set(options.zoom[0],options.zoom[1],options.zoom[2])
+        }
+        scene.add(gltf.scene);
         app.prototype.updateRender();
-        resolve(true)
+        // 动画相关函数调用
+        // 帧动画功能模块
+        let exampleItem = null;
+        let ItemAnimations = null;
+        console.log("模型信息引入",gltf)
+        if(gltf.animations.length){
+          gltf.scene.animations = gltf.animations
+          exampleItem = new AnimationMixer(gltf.scene)
+          ItemAnimations = {
+            id:uuidv4(),
+            example:exampleItem,
+            animationAction:exampleItem.clipAction(gltf.animations[2])
+          }
+          userObj.moduleAnimations.push(ItemAnimations)
+        }
+
+
+
+        resolve({
+          gltf,
+          animation:{
+            exampleItem,
+            ItemAnimations
+          }
+        })
       },()=>{},(error)=>{reject(error)});
     })
   }

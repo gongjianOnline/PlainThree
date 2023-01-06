@@ -1,6 +1,6 @@
 {
   "name": "plain-three",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "龚箭",
   "description": "planThree简易化的threeJS工具库,通过API快速实现three场景",
   "keywords": [
@@ -11,6 +11,8 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "three": "^0.145.0"
+    "@tweenjs/tween.js": "^18",
+    "three": "^0.145.0",
+    "uuid4": "^2.0.3"
   }
 }
