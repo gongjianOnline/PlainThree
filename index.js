@@ -4,6 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { AnimationMixer } from "three/src/animation/AnimationMixer.js"
+import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js"
 
 import TWEEN from '@tweenjs/tween.js'
 
@@ -32,11 +33,15 @@ function PlainThree(options) {
   var camera = undefined;
   var controls = undefined;
   var group = undefined;
+  var labelRenderer = new CSS2DRenderer();
   /***/
   /**自定义全局变量对象 */
   var userObj = {
     moduleAnimations:[]
   };
+  /**函数通用参数定义 */
+  var W = window.innerWidth;
+  var H = window.innerHeight;
   /**
  * 初始化实例
  *  options
@@ -58,7 +63,7 @@ function PlainThree(options) {
     group = new THREE.Group();
     camera = new THREE.PerspectiveCamera(
       75,
-      window.innerWidth / window.innerHeight,
+      W / H,
       0.1,
       1000
     );
@@ -67,6 +72,15 @@ function PlainThree(options) {
     // 设置光线
     const light = new THREE.AmbientLight("#ffffff");
     scene.add(light);
+    // // 创建CSS2D渲染器
+    // labelRenderer.setSize(W, H);
+    // labelRenderer.domElement.style.position = 'absolute';
+    // // 避免renderer.domElement影响HTMl标签定位，设置top为0px
+    // labelRenderer.domElement.style.top = '0px';
+    // labelRenderer.domElement.style.left = '0px';
+    // //设置.pointerEvents=none，以免模型标签HTML元素遮挡鼠标选择场景模型
+    // labelRenderer.domElement.style.pointerEvents = 'none';
+    // document.body.appendChild(labelRenderer.domElement);
   };
 
   /**创建渲染 */
@@ -108,6 +122,7 @@ function PlainThree(options) {
       }
       TWEEN.update(); //tween更新
       renderer.render(scene, camera);
+      // labelRenderer.render(scene, camera);
       controls.update();
       timeS = 0;
     }
@@ -163,8 +178,9 @@ function PlainThree(options) {
   */
   app.prototype.createParts = function(options){
     return new Promise((resolve,reject)=>{
-      const loader = new GLTFLoader().setPath(options.rootPath);
-      loader.load(options.moduleFile, (gltf) => {
+      // const loader = new GLTFLoader().setPath(options.rootPath);
+      const loader = new GLTFLoader()
+      loader.load(options.rootPath+options.moduleFile, (gltf) => {
         
         // 自定义位置信息
         gltf.scene.position.x = options.position[0] || 0;
@@ -191,6 +207,9 @@ function PlainThree(options) {
             example:exampleItem,
             animationAction:exampleItem.clipAction(gltf.animations[2])
           }
+          // ItemAnimations.animationAction.loop = THREE.LoopOnce // 不循环播放
+          // ItemAnimations.animationAction.clampwhenFinished = true // 暂停在最后一帧
+          // ItemAnimations.animationAction.play()
           userObj.moduleAnimations.push(ItemAnimations)
         }
 
@@ -328,6 +347,36 @@ function PlainThree(options) {
         group.remove(item);
       }
     })
+  }
+
+  /**添加自定义的HTML */
+  /**
+   * 配置项 options
+   *  - Mesh Object 必填 模型网格对象
+   *  - HTMLId string 必填 用于获取指定的DOM节点进行其他操作
+   *  - position array[x,y] 选填 要附加的高度
+   */
+  app.prototype.createHtml = function(options){
+    let {Mesh,position,HTMLId} = options;
+
+    var worldVector = Mesh.position.clone();
+    //世界坐标转标准设备坐标，standardVector是WebGL标准设备坐标
+    // .project()方法提取相机参数的视图矩阵、投影矩阵对世界坐标进行变换
+    var standardVector = worldVector.project(camera);
+    // 根据WebGL标准设备坐标standardVector计算div标签在浏览器页面的屏幕坐标
+    // 标准设备坐标转屏幕坐标
+    var a = window.innerWidth / 2;
+    var b = window.innerHeight / 2;
+    var x = Math.round(standardVector.x * a + a); //模型标签x坐标，单位像素
+    var y = Math.round(-standardVector.y * b + b); //模型标签y坐标，单位像素
+
+    setTimeout(() => {
+      let div = document.getElementById(HTMLId)
+      if(!div){return}
+      div.style.left = (x + (position[0]?position[0]:0)) + 'px';
+      div.style.top = (y + (position[1]?position[1]:0)) + 'px';
+    }, 1);
+    
   }
 
   return new app(options)

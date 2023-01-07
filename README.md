@@ -1,6 +1,24 @@
 # planThree 简易化的 ThreeJS
-
-版本号： V1.0.4
+<p align="center">
+    <a href="">
+        <img src="https://img.shields.io/badge/planThree-V1.0.5-orange" alt="uuid4">
+    </a>
+    <a href="">
+        <img src="https://img.shields.io/badge/uuid4-2.0.3-brightgreen" alt="uuid4">
+    </a>
+    <a href="">
+        <img src="https://img.shields.io/badge/three-0.145.0-brightgreen" alt="uuid4">
+    </a>
+    <a href="">
+        <img src="https://img.shields.io/badge/vue-2.0-brightgreen" alt="uuid4">
+    </a>
+    <a href="">
+        <img src="https://img.shields.io/badge/vue-3.0-brightgreen" alt="uuid4">
+    </a>
+    <a href="">
+        <img src="https://img.shields.io/badge/tween-18.0-green" alt="uuid4">
+    </a>
+</p>
 
 本插件是基于 ThreeJs 的二次封装, 可以让使用者通过API调用方式快速创建自己的Three场景, 工具库中提供了基础交互功能,更多功能持续更新中
 
@@ -10,6 +28,8 @@
 npm install plain-three -S
 or 
 yarn add plain-three -S
+or
+pnpm add plain-three
 ```
 
 ## 引入
@@ -262,5 +282,40 @@ ItemAnimations.animationAction.play()
 
 /*如果出去动画停止，或者切换动画时，需要调用stop()停止当前的动画*/
 ItemAnimations.animationAction.stop()
+```
+
+### 11. HTML标注信息
+
+```javascript
+this.app.createHtml(options)
+```
+
+参数
+
+| 参数     | 类型                     | 是否选填 | 描述                               |
+| -------- | ------------------------ | -------- | ---------------------------------- |
+| HTMLId   | string                   | 是       | 传递模型的uuid，用于html的唯一标识 |
+| Mesh     | object                   | 是       | 模型的实例对象                     |
+| position | array[x:number,y:number] | 是       | 用于附加HTML浮窗的位置             |
+
+示例
+
+```javascript
+const moduleHtmlData = []; // 用于存放每个模型的id和数据，用于HTML循环创建元素
+var botany = await this.app.createParts(options) //创建外部模型
+var {scene} = this.botany.gltf;
+moduleHtmlData.push({
+    uuid:scene.uuid,
+    htmlValue:{
+      title:"xxx",
+      w:"xxx",
+      w2:"xxx"
+    }
+})
+this.app.createHtml({
+    HTMLId:scene.uuid,
+    Mesh:scene,
+    position:[40,-130]
+})
 ```
 
