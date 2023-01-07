@@ -18,6 +18,9 @@
     <a href="">
         <img src="https://img.shields.io/badge/tween-18.0-green" alt="uuid4">
     </a>
+    <a href="">
+        <img src="https://img.shields.io/badge/OSCS-%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E9%80%9A%E8%BF%87-blue" alt="uuid4">
+    </a>
 </p>
 
 本插件是基于 ThreeJs 的二次封装, 可以让使用者通过API调用方式快速创建自己的Three场景, 工具库中提供了基础交互功能,更多功能持续更新中
